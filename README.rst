@@ -86,7 +86,7 @@ The documentation is in the doc/ folder.
 About this fork
 ---------------
 
-sphinx-contrib/autorun has been forked several times, with various periods of inactivity.
+``sphinx-contrib/autorun`` has been forked several times, with various periods of inactivity.
 This fork was created in 2020 to fix some issues with line buffering, and added the
 runfirst configuration.
 

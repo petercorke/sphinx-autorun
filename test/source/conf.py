@@ -27,8 +27,6 @@ html_theme = "alabaster"
 html_static_path = ["_static"]
 
 autorun_languages = {}
-autorun_languages["pycon_output_encoding"] = "UTF-8"
-autorun_languages["pycon_input_encoding"] = "UTF-8"
 autorun_languages[
     "pycon_runfirst"
 ] = """

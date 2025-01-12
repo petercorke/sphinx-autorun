@@ -1,0 +1,56 @@
+[project]
+authors = [{ name = "Peter Corke", email = "rvc@petercorke.com" }, {name="Hugo Osvaldo Barrera",
+    email="hugo@barrera.io"}]
+name = "sphinx-autorun"
+version = "0.8.0"
+description = "Sphinx extension autorun"
+
+
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    # Indicate who your project is intended for
+    "Intended Audience :: Developers",
+    # Specify the Python versions you support here.
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+]
+keywords = ["sphinx", "documentation"]
+
+dependencies = ["Sphinx>=0.6"]
+
+[project.urls]
+
+"Homepage" = "https://github.com/petercorke/pgraph-python"
+"Bug Tracker" = "https://github.com/pypa/sampleproject/issues"
+"Documentation" = "https://petercorke.github.io/pgraph-python"
+"GitHub Source" = "https://github.com/petercorke/pgraph-python"
+"Changelog" = "https://github.com/petercorke/pgraph-python/blob/master/CHANGELOG.md"
+
+[project.optional-dependencies]
+
+
+[tool.pytest.ini_options]
+pythonpath = [".", "pgraph"]
+
+
+[build-system]
+requires = ["setuptools", "oldest-supported-numpy"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["pgraph"]
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+
+[tool.coverage.run]
+omit = []

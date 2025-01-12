@@ -18,18 +18,27 @@ documentation for details.
 
 Here's some code that will be executed and the output will be displayed in the documentation.
 
+
 .. runblock:: pycon
-   :foobar: 123
+   :numpy:
 
    >>> from spatialmath.base import getunit
    >>> import numpy as np
    >>> getunit(1.5, 'rad')
    >>> getunit(1.5, 'rad', dim=0)
-   >>> # getunit([1.5], 'rad', dim=0)  --> ValueError
+   >>> try:
+   >>>   getunit(1.5, 'rad', dim=0)
+   >>> except Exception as e:
+   >>>   print(f"EXCEPTION {e}")
+   >>>
+   >>> for i in range(4):
+   >>>    print(i)
+   >>>
+   >>> getunit([1.5], 'rad', dim=0))  # --> ValueError
    >>> getunit(90, 'deg')
    >>> getunit([90, 180], 'deg')
-   >>> getunit(np.r_[0.5, 1], 'rad')
+   >>> getunit(np.r_[0.5, 1], 'rad') # ignore
    >>> getunit(np.r_[90, 180], 'deg')
    >>> getunit(np.r_[90, 180], 'deg', dim=2)
-   >>> # getunit([90, 180], 'deg', dim=3)  --> ValueError
+   >>> getunit([90, 180], 'deg', dim=3)  # --> ValueError
 

@@ -63,6 +63,8 @@ A more general solution is to add lines of code to the ``conf.py`` file::
     ANSITable._color = False
     """
 
+This option is useful for setting up the Python environment for all code blocks in the document.
+
 Both options can be used together, in which case the code in the ``conf.py`` file is executed second.
 
 Installation
@@ -87,9 +89,9 @@ The documentation is in the doc/ folder.
 About this fork
 ---------------
 
-sphinx-contrib/autorun was abandoned and broken for several months. Since it
-did not even work, this fork was created as a continuation of it with mostly
-critical fixes.
+sphinx-contrib/autorun has been forked many times, with various periods of inactivity.
+This fork was created in 2020 to fix some issues with line buffering, and added the
+runfirst configuration.
 
-Recent changes have removed the need to spawn a subprocess for each code block, but
-this means that the console option is no longer supported.
+Recent changes have removed the need to spawn a subprocess for each code block, and 
+dropped support for the console option.

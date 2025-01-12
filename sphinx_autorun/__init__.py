@@ -39,18 +39,18 @@ __version__ = version.version
 
 
 class RunBlockError(SphinxError):
-    category = 'runblock error'
+    category = "runblock error"
 
 
 class AutoRun(object):
     here = os.path.abspath(__file__)
-    pycon = os.path.join(os.path.dirname(here), 'pycon.py')
+    pycon = os.path.join(os.path.dirname(here), "pycon.py")
     config = {
-        'pycon': 'python ' + pycon,
-        'pycon_prefix_chars': 4,
-        'pycon_show_source': False,
-        'console': 'bash',
-        'console_prefix_chars': 1,
+        "pycon": "python " + pycon,
+        "pycon_prefix_chars": 4,
+        "pycon_show_source": False,
+        "console": "bash",
+        "console_prefix_chars": 1,
     }
 
     @classmethod
@@ -64,7 +64,7 @@ class RunBlock(Directive):
     optional_arguments = 0
     final_argument_whitespace = False
     option_spec = {
-        'linenos': directives.flag,
+        "linenos": directives.flag,
     }
     print("Peter's version")
 
@@ -73,16 +73,16 @@ class RunBlock(Directive):
         language = self.arguments[0]
 
         if language not in config:
-            raise RunBlockError('Unknown language %s' % language)
+            raise RunBlockError("Unknown language %s" % language)
 
         # Get configuration values for the language
         args = config[language].split()
-        input_encoding = config.get(language+'_input_encoding', 'ascii')
-        output_encoding = config.get(language+'_output_encoding', 'ascii')
-        prefix_chars = config.get(language+'_prefix_chars', 0)
-        show_source = config.get(language+'_show_source', True)
-        runfirst = config.get(language+'_runfirst', None)
-        runfirst = runfirst.strip().split('\n')
+        input_encoding = config.get(language + "_input_encoding", "ascii")
+        output_encoding = config.get(language + "_output_encoding", "ascii")
+        prefix_chars = config.get(language + "_prefix_chars", 0)
+        show_source = config.get(language + "_show_source", True)
+        runfirst = config.get(language + "_runfirst", None)
+        runfirst = runfirst.strip().split("\n")
 
         # Build the code text
         if output_encoding == "ascii":
@@ -93,7 +93,7 @@ class RunBlock(Directive):
         codelines = [line[prefix_chars:] for line in self.content]
         if runfirst is not None:
             codelines = runfirst + codelines
-        code = u'\n'.join(codelines).encode(input_encoding)
+        code = "\n".join(codelines).encode(input_encoding)
 
         # print('-------------------------------')
         # print(code)
@@ -109,27 +109,27 @@ class RunBlock(Directive):
 
         nlines = len(runfirst)
         if nlines > 0:
-            out = out.split(u'\n')
-            out = u'\n'.join(out[nlines:])
+            out = out.split("\n")
+            out = "\n".join(out[nlines:])
 
         # Get the original code with prefixes
         # print(self.content)
         # print(out)
         if show_source:
-            code = u'\n'.join(self.content)
-            code_out = u'\n'.join((code, out))
-            
+            code = "\n".join(self.content)
+            code_out = "\n".join((code, out))
+
         else:
             code_out = out
         # print(code_out)
 
         literal = nodes.literal_block(code_out, code_out)
-        literal['language'] = language
-        literal['linenos'] = 'linenos' in self.options
+        literal["language"] = language
+        literal["linenos"] = "linenos" in self.options
         return [literal]
 
 
 def setup(app):
-    app.add_directive('runblock', RunBlock)
-    app.connect('builder-inited', AutoRun.builder_init)
-    app.add_config_value('autorun_languages', AutoRun.config, 'env')
+    app.add_directive("runblock", RunBlock)
+    app.connect("builder-inited", AutoRun.builder_init)
+    app.add_config_value("autorun_languages", AutoRun.config, "env")

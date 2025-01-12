@@ -12,33 +12,58 @@ For example::
     .. runblock:: pycon
         
         >>> for i in range(5):
-        ...    print i
+        ...    print(i)
 
 Produces::
 
     >>> for i in range(5):
-    ...    print i
+    ...    print(i)
+    0
     1
     2
     3
     4
-    5
 
 
-Another example::
+If the code throws an exception, this is indicated::
+    
+    >>> getunit([90, 180], 'deg', dim=3)
+    !! ValueError: incorrect vector length: expected 3, got 2
+    
+A syntax error in the code will be displayed as an error message::
 
-    .. runblock:: console
+        >>> print(("Hello, world")
+        !! ^^^^^^^^ SYNTAX ERROR ^^^^^^^^ 
 
-        $ date
+Code environment
+----------------
 
-Produces::
+The code is executed in the current Python environment.  Initialization of the Python session prior
+to executing the code block can be achieved by::
 
-    $ date 
-    Thu  4 Mar 2010 22:56:49 EST
+    .. runblock:: pycon
+        :numpy:
+        :scipy:
+        :smtb:
 
-Currently autorun supports ``pycon`` and ``console`` languages. It's also
-possible to configure autorun (from `conf.py`) to run other languages.
+        >>> np.array([1, 2, 3])
 
+    where the options respectively import: numpy, scipy, and spatialmath-toolbox.
+
+A more general solution is to add lines of code to the ``conf.py`` file::
+
+    autorun_languages[
+        "pycon_runfirst"
+    ] = """
+    from spatialmath import SE3
+    SE3._color = False
+    import numpy as np
+    np.set_printoptions(precision=4, suppress=True)
+    from ansitable import ANSITable
+    ANSITable._color = False
+    """
+
+Both options can be used together, in which case the code in the ``conf.py`` file is executed second.
 
 Installation
 ------------
@@ -65,3 +90,6 @@ About this fork
 sphinx-contrib/autorun was abandoned and broken for several months. Since it
 did not even work, this fork was created as a continuation of it with mostly
 critical fixes.
+
+Recent changes have removed the need to spawn a subprocess for each code block, but
+this means that the console option is no longer supported.

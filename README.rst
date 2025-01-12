@@ -30,7 +30,7 @@ If the code throws an exception, this is indicated::
     >>> getunit([90, 180], 'deg', dim=3)
     !! ValueError: incorrect vector length: expected 3, got 2
     
-A syntax error in the code will be displayed as an error message::
+A syntax error in the code will be displayed in the documentation as an error message::
 
         >>> print(("Hello, world")
         !! ^^^^^^^^ SYNTAX ERROR ^^^^^^^^ 
@@ -70,13 +70,10 @@ Both options can be used together, in which case the code in the ``conf.py`` fil
 Installation
 ------------
 
-Installing via pip (recommended)::
-
-    $ pip install sphinx-autorun
 
 Install from source::
 
-    $ git clone git@github.com:hobarrera/sphinx-autorun.git
+    $ git clone git@github.com:petercorke/sphinx-autorun.git
     $ python setup.py install
 
 To enable autorun add 'sphinx_autorun' to the ``extension`` list in
@@ -89,7 +86,7 @@ The documentation is in the doc/ folder.
 About this fork
 ---------------
 
-sphinx-contrib/autorun has been forked many times, with various periods of inactivity.
+sphinx-contrib/autorun has been forked several times, with various periods of inactivity.
 This fork was created in 2020 to fix some issues with line buffering, and added the
 runfirst configuration.
 

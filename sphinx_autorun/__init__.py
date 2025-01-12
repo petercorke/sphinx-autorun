@@ -54,21 +54,6 @@ class AutoRun(object):
         cls.config.update(app.builder.config.autorun_languages)
 
 
-"""
-
-.. directivename:: arguments
-    :key1: val1
-    :key2: val2
-
-    directive content
-
-directive has arguments, options and content
-
-:role-name:`role content`
-
-"""
-
-
 # this class is related to the particular directive
 class RunBlock(Directive):
     has_content = True
@@ -199,7 +184,7 @@ def runsource(self, source, filename="<input>", symbol="single"):
     try:
         exception = f"!! {type(sys.last_value).__name__}: {sys.last_value}"
         print(exception)
-        del sys.last_type
+        del sys.last_value
     except AttributeError:
         # there was no exception in runcode()
         exception = None
@@ -214,7 +199,7 @@ def runsource(self, source, filename="<input>", symbol="single"):
 
 
 def runblock(code):
-    print(code)
+    # print(code)
     source_lines = (line.rstrip() for line in code)
     console = InteractiveInterpreter()
     results = []
@@ -224,9 +209,10 @@ def runblock(code):
             source = next(source_lines)
 
             more, retval = runsource(console, source)
+            print(source)
             while more:
                 next_line = next(source_lines)
-                # print("...", next_line)
+                print("...", next_line)
                 source += "\n" + next_line
                 more, retval = runsource(console, source)
 

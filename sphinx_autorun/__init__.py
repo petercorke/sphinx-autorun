@@ -79,7 +79,7 @@ class RunBlock(Directive):
         # Get configuration values for the language from conf.py
         args = config[language].split()
         prefix_chars = config.get(language + "_prefix_chars", 0)
-        show_source = config.get(language + "_show_source", True)
+        show_source = config.get(language + "_show_source", False)
         runfirst = config.get(language + "_runfirst", None)
 
         if "numpy" in self.options:
@@ -100,7 +100,7 @@ class RunBlock(Directive):
         # self.content is a list of lines of the code block, with prompts
         code += [line[prefix_chars:] for line in self.content]
         # print(code)
-        results = runblock(code)
+        results = runblock(code, show_source)
         # print(results)
 
         code_out = ""
@@ -198,7 +198,7 @@ def runsource(self, source, filename="<input>", symbol="single"):
     return False, retval
 
 
-def runblock(code):
+def runblock(code, show_source):
     # print(code)
     source_lines = (line.rstrip() for line in code)
     console = InteractiveInterpreter()
@@ -209,10 +209,12 @@ def runblock(code):
             source = next(source_lines)
 
             more, retval = runsource(console, source)
-            print(source)
+            if show_source:
+                print(source)
             while more:
                 next_line = next(source_lines)
-                print("...", next_line)
+                if show_source:
+                    print("...", next_line)
                 source += "\n" + next_line
                 more, retval = runsource(console, source)
 

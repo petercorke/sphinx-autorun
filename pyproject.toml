@@ -1,10 +1,12 @@
 [project]
-authors = [{ name = "Peter Corke", email = "rvc@petercorke.com" }, {name="Hugo Osvaldo Barrera",
-    email="hugo@barrera.io"}]
+
+authors = [
+    { name = "Peter Corke", email = "rvc@petercorke.com" },
+    { name = "Hugo Osvaldo Barrera", email = "hugo@barrera.io" },
+]
 name = "sphinx-autorun"
 version = "0.8.0"
 description = "Sphinx extension autorun"
-
 
 readme = "README.md"
 requires-python = ">=3.9"
@@ -38,15 +40,15 @@ dependencies = ["Sphinx>=0.6"]
 
 
 [tool.pytest.ini_options]
-pythonpath = [".", "pgraph"]
+pythonpath = [".", "sphinx_autorun"]
 
 
 [build-system]
-requires = ["setuptools", "oldest-supported-numpy"]
+requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["pgraph"]
+packages = ["sphinx_autorun"]
 
 [tool.black]
 line-length = 88

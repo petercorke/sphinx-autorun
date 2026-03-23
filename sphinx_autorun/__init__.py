@@ -29,7 +29,12 @@ from code import InteractiveInterpreter
 from docutils import nodes
 from docutils.parsers.rst import Directive, directives
 from sphinx.errors import SphinxError
-from . import version as _version_module
+
+try:
+    from importlib.metadata import version as _get_version
+    __version__ = _get_version('sphinx-autorun')
+except Exception:
+    __version__ = '0.0.0'
 
 
 def shorter(path):
@@ -65,8 +70,6 @@ def linerange(s):
     else:
         return set(list(range(start, 101)))
 
-
-__version__ = _version_module.version
 
 logfile = None
 

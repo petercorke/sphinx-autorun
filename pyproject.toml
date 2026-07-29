@@ -38,7 +38,7 @@ dependencies = ["Sphinx>=4.0"]
 "Changelog" = "https://github.com/petercorke/sphinx-pyrunblock/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
-dev = ["pytest", "coverage", "ruff"]
+dev = ["pytest", "coverage", "ruff", "numpy"]
 
 
 [tool.pytest.ini_options]

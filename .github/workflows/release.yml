@@ -6,7 +6,10 @@ name: Release
 
 on:
   release:
-    types: [created]
+    # Releases published directly (not via the draft workflow -- e.g.
+    # `gh release create` without --draft) have been observed to fire
+    # "published" without "created" in this environment; listen for both.
+    types: [created, published]
   workflow_dispatch:
 
 jobs:
@@ -79,4 +82,4 @@ jobs:
 
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          skip_existing: true
+          skip-existing: true

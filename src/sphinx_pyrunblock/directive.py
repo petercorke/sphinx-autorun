@@ -1,0 +1,181 @@
+"""The ``runblock`` directive itself."""
+
+from docutils import nodes
+from docutils.parsers.rst import Directive, directives
+
+from .config import AutoRun, RunBlockError
+from .interpreter import runblock
+from .utils import linerange, shorter
+
+
+def build_runfirst(base_runfirst, options):
+    """
+    Build the code to execute before a runblock's own content.
+
+    ``:numpy:``/``:scipy:`` prepend their import so the language's
+    configured ``runfirst`` (which may itself use numpy/scipy) can rely on
+    it; ``:smtb:``/``:precision:`` append, since ``:precision:`` in
+    particular depends on numpy already being imported by this point.
+
+    :param base_runfirst: the language's configured ``<lang>_runfirst`` string
+    :type base_runfirst: str
+    :param options: the directive's parsed options (``self.options``)
+    :type options: dict
+    :return: the final runfirst code
+    :rtype: str
+    """
+    runfirst = base_runfirst
+    if "numpy" in options:
+        runfirst = "import numpy as np\n" + runfirst
+    if "scipy" in options:
+        runfirst = "import scipy as sp\n" + runfirst
+    if "smtb" in options:
+        runfirst += "from spatialmath import *\n"
+    if "precision" in options:
+        runfirst += f"np.set_printoptions(precision={options['precision']})\n"
+    return runfirst
+
+
+class RunBlock(Directive):
+    """
+    Subclass of Directive that implements the runblock directive.
+
+    The runblock directive is used to run a block of code and insert the
+    output into the document::
+
+        .. runblock:: ARGUMENT
+            :OPTION: VALUE
+            :OPTION: VALUE
+
+            code block
+
+    ARGUMENT is the language of the code block, e.g. pycon (Python console).
+    Each language has some configuration options defined in the AutoRun class.
+
+    """
+
+    has_content = True  # directive has content, the lines of code
+    required_arguments = 1  # one required arguent is the language
+    optional_arguments = 0
+    final_argument_whitespace = False
+
+    # supported options
+    #  .flag is True if present, False if not
+    #  .unchanged means the option has a value
+    option_spec = {
+        "linenos": directives.flag,
+        "include": directives.unchanged,
+        "exclude": directives.unchanged,
+        "numpy": directives.flag,
+        "scipy": directives.flag,
+        "smtb": directives.flag,
+        "precision": directives.unchanged,
+    }
+
+    def run(self):
+        """
+        Format the code block
+
+        This method is invoked on every invocation of the directive.
+
+        - ``self.content`` is a list of lines of the code block, with prompts
+        - ``self.arguments`` is a list of arguments to the directive
+        - ``self.options`` is a dictionary of options to the directive
+        """
+
+        # get the language of the code block
+        language = self.arguments[0]  # first argument of the directive
+
+        # process configuration options
+        config = AutoRun.config  # dict of configurations from defaults and conf.py
+
+        if language not in config:
+            raise RunBlockError("Unknown language %s" % language)
+
+        # Get configuration values for the language from conf.py
+        # - get the configuration values LANGUAGE_xxx
+        prefix_chars = config.get(
+            language + "_prefix_chars", 0
+        )  # number of prompt chars to strip
+        show_source = config.get(
+            language + "_show_source", False
+        )  # show the source code
+
+        # attempt to find the originating source, with robust fallback to rst file
+        srcfile = shorter(self.reporter.source)
+
+        try:
+            note = self.state_machine.observers[0].__self__
+            s = str(note.current_source)
+            srcfile = shorter(s.split(":")[0])
+        except Exception:
+            # keep fallback value
+            pass
+
+        where = f"{srcfile}:{self.lineno}"
+
+        runfirst = build_runfirst(config.get(language + "_runfirst", ""), self.options)
+
+        include_lines = linerange(self.options.get("include", None))
+        exclude_lines = linerange(self.options.get("exclude", None))
+
+        # build the code block
+
+        # first add the runfirst code, which comes from the configuration
+        # file; it's a newline-separated string without prompts, and is
+        # not shown in the output
+        code = [rf.strip() for rf in runfirst.split("\n") if len(rf.strip()) > 0]
+
+        runfirst_len = len(code)
+
+        # self.content is a list of lines of the code block, with prompts.
+        # Only strip the prompt prefix (e.g. ">>> " or "... ") from lines that
+        # actually carry a prompt; bare continuation lines (e.g. the body of a
+        # triple-quoted string) must not have their content characters removed.
+        def _strip_line(line):
+            s = line.strip()
+            if s in (">>>", "..."):
+                # A bare prompt with nothing typed after it represents an
+                # empty input line (e.g. pressing Enter to close a compound
+                # statement), not literal ">>>"/"..." text.
+                return ""
+            if s.startswith((">>> ", "... ")):
+                return s[prefix_chars:]
+            return s
+
+        code += [_strip_line(line) for line in self.content]
+
+        ######## RUN THE CODE BLOCK ##########
+        results = runblock(code, show_source, where)
+
+        # the result is a list of tuples, each tuple is a pair of input and output
+
+        code_out = ""
+        for lineno, (inp, outp) in enumerate(
+            results[runfirst_len:],
+            start=1,
+        ):  # for all i/o pairs after the runfirst code
+            # check if the line is to be included or excluded
+            if lineno in exclude_lines:
+                continue
+            if include_lines and lineno not in include_lines:
+                continue
+
+            if "\n" in inp:
+                # multiline input
+                lines = inp.split("\n")
+                code_out += (
+                    "\n".join(
+                        [">>> " + lines[0]] + ["... " + line for line in lines[1:]]
+                    )
+                    + "\n"
+                )
+            else:
+                code_out += ">>> " + inp + "\n"
+            if len(outp) > 0:
+                code_out += outp + "\n"
+
+        literal = nodes.literal_block(code_out, code_out)
+        literal["language"] = language
+        literal["linenos"] = "linenos" in self.options
+        return [literal]

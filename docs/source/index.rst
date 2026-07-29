@@ -1,148 +1,175 @@
-=====================
-Autorun Documentation
-=====================
+sphinx-pyrunblock
+==================
 
-:maintainer: Hugo Osvaldo Barrera <hugo@barrera.io>
-:author: Vadim Gubergrits <vadim.gubergrits@gmail.com>
+.. image:: ../figs/pyrunblock-logo.svg
+   :align: center
+   :width: 350
+   :alt: sphinx-pyrunblock
 
-Autorun is an extension for Sphinx that can execute the code from a
-runblock directive and attach the output of the execution to the document. 
-
-For example:
-
-.. code-block:: rst
+``sphinx-pyrunblock`` is a Sphinx extension that executes code from a
+``runblock`` directive and inserts the real output into your documentation.
+For example::
 
     .. runblock:: pycon
-        
+
         >>> for i in range(5):
         ...    print(i)
-        ...
 
-Produces
-
-.. runblock:: pycon
-        
-    >>> for i in range(5):
-    ...    print(i)
-    ...
-
-
-Another example
-
-.. code-block:: rst
-
-    .. runblock:: console
-
-        $ date
-
-Produces
-
-.. runblock:: console
-
-    $ date 
-    
-Should a user desire to omit some lines:
-
-.. code-block:: rst
-
-    .. runblock:: pycon
-        
-        >>> setup_function(args)  # ignore
-        >>> for i in range(5):
-        ...    print(i)
-        ...
-
-Produces
+produces:
 
 .. runblock:: pycon
-        
+
     >>> for i in range(5):
     ...    print(i)
-    ...
-  
 
-Currently autorun supports ``pycon`` and ``console`` languages. It's also
-possible to configure autorun (from :file:`conf.py`) to run other languages.
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
 
+   configuration
+   about
 
 Installation
------------------
-
-Installing via pip
+------------
 
 .. code-block:: console
 
-    $ pip install sphinx_autorun
+    $ pip install sphinx-pyrunblock
 
-Installing from sources
-
-.. code-block:: console
-
-    $ git clone git@github.com:hobarrera/sphinx-autorun.git
-    $ python setup.py install
-
-
-Configuration
------------------
-
-To enable the autorun extension add 'sphinx_autorun' to the ``extensions`` list
-in :file:`conf.py`.
+Enable the extension by adding it to the ``extensions`` list in ``conf.py``:
 
 .. code-block:: python
 
     extensions = [
-      'sphinx_autorun',
+        "sphinx_pyrunblock",
     ]
 
-By default autorun supports ``pycon`` and ``console``.  It's possible to
-configure autorun to run other languages. First you need to be able to pipe your
-source to an executable. In many cases it's already done but you can build
-your own program to do that.
+See :doc:`configuration` for the full ``conf.py`` reference.
 
+Worked examples
+----------------
 
-``autorun_languages``:
+.. runblock:: pycon
 
-    This is a dictionary in :file:`conf.py` that maps a language to an
-    executable. For example:
-            
-    .. code-block:: python
-        
-        autorun_languages = {}
-        autorun_languages['pycon']='python -'
-    
-    In order to pipe python code to python executable we must use the ``-``
-    argument.
-    
-    It's also possible to specify the number of characters to remove from each
-    line before sending the code. To do that map ``${language}_prefix_chars``
-    to the number of characters to remove.
+   >>> from spatialmath.base import trnorm, troty
+   >>> from numpy import linalg
+   >>> T = troty(45, 'deg', t=[3, 4, 5])
+   >>> linalg.det(T[:3,:3]) - 1 # is a valid SO(3)
+   >>> T = T @ T @ T @ T @ T @ T @ T @ T @ T @ T @ T @ T @ T
+   >>> linalg.det(T[:3,:3]) - 1  # not quite a valid SE(3) anymore
+   >>> T = trnorm(T)
+   >>> linalg.det(T[:3,:3]) - 1  # once more a valid SE(3)
 
-    .. code-block:: python
+.. runblock:: pycon
 
-        autorun_languages = {}
-        autorun_languages['pycon'] = 'python -'
-        autorun_languages['pycon_prefix_chars'] = 4
+   >>> from spatialmath.base import qconj, qprint
+   >>> q = [1, 2, 3, 4]
+   >>> qprint(qconj(q))
 
+Per-block options
+------------------
 
-Example of configuring autorun to run gnuplot scripts.
+Options are given on the directive itself, and apply to that one block only
+(compare :doc:`configuration` for options that apply document-wide, via
+``conf.py``):
 
-.. code-block:: python
+``:linenos:``
+    Show line numbers in the rendered code block.
 
-    autorun_languages['gnuplot'] = 'gnuplot'
+``:include: start-end``
+    Only render lines in the given range of the block's *output* (line
+    numbers count the block's own statements, not the configured
+    ``runfirst`` code, which never appears in output).
 
-.. code-block:: rst
+``:exclude: start-end``
+    Skip lines in the given range, same numbering as ``:include:``.
 
-    .. runblock:: gnuplot
-        
-        set term png
-        set out 'log.png'
-        plot log(x)
+``:numpy:``
+    Prepend ``import numpy as np`` before the block runs.
 
+``:scipy:``
+    Prepend ``import scipy as sp`` before the block runs.
 
-This will not produce any output on stdout but it will write the
-:download:`log.png` file that can be included with a standard image directive:
+``:smtb:``
+    Append ``from spatialmath import *`` before the block runs.
 
-.. code-block:: rst
+``:precision: N``
+    Append ``np.set_printoptions(precision=N)`` before the block runs.
+    Requires numpy to already be imported (via ``:numpy:`` or a configured
+    ``runfirst`` -- see :doc:`configuration`).
 
-    .. image:: log.png
+.. runblock:: pycon
+   :include:  5-10
 
+      >>> from spatialmath.base import getunit
+      >>> import numpy as np
+      >>> getunit(1.5, 'rad')
+      >>> getunit(90, 'deg')
+      >>> getunit(90, 'deg', vector=False) # force a scalar output
+      >>> getunit(1.5, 'rad', dim=0) # check argument is scalar
+      >>> getunit(1.5, 'rad', dim=3) # check argument is a 3-vector
+      >>> getunit([1.5], 'rad', dim=1) # check argument is a 1-vector
+      >>> getunit([1.5], 'rad', dim=3) # check argument is a 3-vector
+      >>> getunit(90, 'deg')
+      >>> getunit([90, 180], 'deg')
+      >>> getunit(np.r_[0.5, 1], 'rad')
+      >>> getunit(np.r_[90, 180], 'deg')
+      >>> getunit(np.r_[90, 180], 'deg', dim=2)
+      >>> getunit([90, 180, 270], 'deg', dim=3)
+
+For any construct with an indented body (``for``, ``while``, ``with``), it's
+important to put a blank line on the end. That will be stripped off and
+won't appear in the output.
+
+.. runblock:: pycon
+   :numpy:
+
+   >>> from spatialmath.base import getunit
+   >>> getunit(1.5, 'rad')
+   >>> try:
+   >>>   getunit(1.5, 'rad', dim=0)
+   >>> except Exception as e:
+   >>>   print(f"EXCEPTION {e}")
+   >>>
+   >>> for i in range(5):
+   >>>    print(i)
+   >>>
+
+Lines ending with ``# ignore`` are executed but not shown in the rendered
+output -- useful for setup code that would otherwise clutter the example.
+
+Error reporting
+----------------
+
+If the code raises an exception, a diagnostic marker is written to the
+Sphinx build log and a short error summary is embedded in the rendered
+output:
+
+.. code-block:: text
+
+    >>> img.metadata('FocalLength')
+    !! [RUNBLOCK-ERROR] machinevisiontoolbox/ImageIO.py:236
+        KeyError: 'FocalLength'
+
+The build log entry is more detailed:
+
+.. code-block:: text
+
+    !! [RUNBLOCK-ERROR] source/numpy.rst:98
+        ModuleNotFoundError: No module named 'machinevisionToolbox'
+        Traceback (most recent call last):
+          File "<input>", line 1, in <module>
+        ModuleNotFoundError: No module named 'machinevisionToolbox'
+
+The marker line appears **before** the traceback so failures are easy to
+scan in a long build log. The source location (``file:line``) refers to the
+``.rst`` file, or the Python source file containing the docstring where the
+``runblock`` directive lives.
+
+A syntax error in the code block is reported the same way:
+
+.. code-block:: text
+
+    >>> print(("Hello, world")
+    !! [RUNBLOCK-ERROR] source/api.rst:42
+        SyntaxError: '(' was never closed

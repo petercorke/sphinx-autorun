@@ -4,11 +4,13 @@ authors = [
     { name = "Peter Corke", email = "rvc@petercorke.com" },
     { name = "Hugo Osvaldo Barrera", email = "hugo@barrera.io" },
 ]
-name = "sphinx-autorun"
-version = "0.8.0"
-description = "Sphinx extension autorun"
+name = "sphinx-pyrunblock"
+version = "1.0.0"
+description = "Sphinx extension that executes code and embeds real output in docs (.. runblock:: directive)"
 
 readme = "README.md"
+license = "BSD-2-Clause"
+license-files = ["LICENCE"]
 requires-python = ">=3.9"
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -21,38 +23,52 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
 
-    "License :: OSI Approved :: BSD License",
     "Operating System :: OS Independent",
 ]
-keywords = ["sphinx", "documentation"]
+keywords = ["sphinx", "documentation", "doctest", "runblock"]
 
-dependencies = ["Sphinx>=0.6"]
+dependencies = ["Sphinx>=4.0"]
 
 [project.urls]
 
-"Homepage" = "https://github.com/petercorke/pgraph-python"
-"Bug Tracker" = "https://github.com/pypa/sampleproject/issues"
-"Documentation" = "https://petercorke.github.io/pgraph-python"
-"GitHub Source" = "https://github.com/petercorke/pgraph-python"
-"Changelog" = "https://github.com/petercorke/pgraph-python/blob/master/CHANGELOG.md"
+"Homepage" = "https://github.com/petercorke/sphinx-pyrunblock"
+"Bug Tracker" = "https://github.com/petercorke/sphinx-pyrunblock/issues"
+"Documentation" = "https://petercorke.github.io/sphinx-pyrunblock"
+"GitHub Source" = "https://github.com/petercorke/sphinx-pyrunblock"
+"Changelog" = "https://github.com/petercorke/sphinx-pyrunblock/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
+dev = ["pytest", "coverage", "ruff"]
 
 
 [tool.pytest.ini_options]
-pythonpath = [".", "sphinx_autorun"]
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "--tb=short"
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["sphinx_pyrunblock"]
 
 
 [build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.setuptools]
-packages = ["sphinx_autorun"]
+[tool.hatch.build.targets.wheel]
+packages = ["src/sphinx_pyrunblock"]
+
+[tool.hatch.build.targets.sdist]
+exclude = ["/test", "/tests", "/.git", "/.github", "/.claude", "/.vscode"]
 
 [tool.black]
 line-length = 88
-target-version = ['py311']
+target-version = ["py39", "py310", "py311", "py312", "py313"]
 
 [tool.coverage.run]
 omit = []

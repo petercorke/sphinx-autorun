@@ -4,4 +4,5 @@
 build
 dist
 *.egg-info
-sphinx_autorun/version.py
+.claude
+.DS_Store

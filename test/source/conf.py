@@ -6,7 +6,7 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "autorun"
+project = "sphinx-pyrunblock"
 copyright = "2025, Peter Corke"
 author = "Peter Corke"
 release = "1.0.0"
@@ -14,7 +14,7 @@ release = "1.0.0"
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ["sphinx_autorun"]
+extensions = ["sphinx_pyrunblock"]
 
 templates_path = ["_templates"]
 exclude_patterns = []

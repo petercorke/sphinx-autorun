@@ -15,7 +15,6 @@ documentation for details.
    :maxdepth: 2
    :caption: Contents:
 
-
 Here's some code that will be executed and the output will be displayed in the documentation.
 
 .. runblock:: pycon
@@ -26,7 +25,7 @@ Here's some code that will be executed and the output will be displayed in the d
    >>> linalg.det(T[:3,:3]) - 1 # is a valid SO(3)
    >>> T = T @ T @ T @ T @ T @ T @ T @ T @ T @ T @ T @ T @ T
    >>> linalg.det(T[:3,:3]) - 1  # not quite a valid SE(3) anymore
-   >>> T = trnorm(T)
+   >>>   T = trnorm(T)
    >>> linalg.det(T[:3,:3]) - 1  # once more a valid SE(3)
 
 
@@ -52,7 +51,49 @@ Here's some code that will be executed and the output will be displayed in the d
       >>> getunit(np.r_[0.5, 1], 'rad')
       >>> getunit(np.r_[90, 180], 'deg')
       >>> getunit(np.r_[90, 180], 'deg', dim=2)
-      >>> getunit([90, 180], 'deg', dim=3)
+      >>> getunit([90, 180, 270], 'deg', dim=3)
+
+.. runblock:: pycon
+   :include:  5-10
+
+      >>> from spatialmath.base import getunit
+      >>> import numpy as np
+      >>> getunit(1.5, 'rad')
+      >>> getunit(90, 'deg')
+      >>> getunit(90, 'deg', vector=False) # force a scalar output
+      >>> getunit(1.5, 'rad', dim=0) # check argument is scalar
+      >>> getunit(1.5, 'rad', dim=3) # check argument is a 3-vector
+      >>> getunit([1.5], 'rad', dim=1) # check argument is a 1-vector
+      >>> getunit([1.5], 'rad', dim=3) # check argument is a 3-vector
+      >>> getunit(90, 'deg')
+      >>> getunit([90, 180], 'deg')
+      >>> getunit(np.r_[0.5, 1], 'rad')
+      >>> getunit(np.r_[90, 180], 'deg')
+      >>> getunit(np.r_[90, 180], 'deg', dim=2)
+      >>> getunit([90, 180, 270], 'deg', dim=3)
+
+.. runblock:: pycon
+   :exclude: 1-5
+
+      >>> from spatialmath.base import getunit
+      >>> import numpy as np
+      >>> getunit(1.5, 'rad')
+      >>> getunit(90, 'deg')
+      >>> getunit(90, 'deg', vector=False) # force a scalar output
+      >>> getunit(1.5, 'rad', dim=0) # check argument is scalar
+      >>> getunit(1.5, 'rad', dim=3) # check argument is a 3-vector
+      >>> getunit([1.5], 'rad', dim=1) # check argument is a 1-vector
+      >>> getunit([1.5], 'rad', dim=3) # check argument is a 3-vector
+      >>> getunit(90, 'deg')
+      >>> getunit([90, 180], 'deg')
+      >>> getunit(np.r_[0.5, 1], 'rad')
+      >>> getunit(np.r_[90, 180], 'deg')
+      >>> getunit(np.r_[90, 180], 'deg', dim=2)
+      >>> getunit([90, 180, 270], 'deg', dim=3)
+
+
+For any construct with an indented body (for, while, with), it's important to put a blank line on the 
+end.  That will be stripped off and won't appear in the output.
 
 .. runblock:: pycon
    :numpy:
@@ -66,8 +107,14 @@ Here's some code that will be executed and the output will be displayed in the d
    >>> except Exception as e:
    >>>   print(f"EXCEPTION {e}")
    >>>
-   >>> for i in range(4):
+   >>> for i in range(5):
    >>>    print(i)
    >>>
 
 
+.. runblock:: pycon
+
+    >>> a = 1
+    >>> b = 2
+    >>> for i in range(5):
+    >>>    print(i)

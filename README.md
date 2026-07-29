@@ -1,14 +1,29 @@
-# sphinx-autorun
+<div align="center">
+  <img src="https://github.com/petercorke/sphinx-pyrunblock/raw/main/docs/figs/pyrunblock-logo.svg" width="350">
+  <br><br>
 
-`sphinx-autorun` is an extension for [Sphinx](https://sphinx.readthedocs.io/) that can execute the code from a
-runblock directive and insert the output of the execution into the document. For example:
-```
+[![PyPI version](https://img.shields.io/pypi/v/sphinx-pyrunblock?style=for-the-badge&color=blue)](https://pypi.org/project/sphinx-pyrunblock/)
+  [![Documentation](https://img.shields.io/badge/Docs-View_Online-blue?style=for-the-badge)](https://petercorke.github.io/sphinx-pyrunblock/)
+  [![Build Status](https://img.shields.io/github/actions/workflow/status/petercorke/sphinx-pyrunblock/ci.yml?branch=main&style=for-the-badge)](https://github.com/petercorke/sphinx-pyrunblock/actions/workflows/ci.yml)
+</div>
+
+# sphinx-pyrunblock
+
+Fast, in-process embedding of live Python code output into your Sphinx docs.
+`sphinx-pyrunblock` runs each `.. runblock::` example directly in a shared
+interpreter rather than spawning a subprocess per block — and it's backward
+compatible with `sphinx-autorun`: same `runblock` directive, same
+`autorun_languages` config shape, drop-in upgrade.
+
+```rst
     .. runblock:: pycon
-        
+
         >>> for i in range(5):
         ...    print(i)
 ```
+
 Produces:
+
 ```
     >>> for i in range(5):
     ...    print(i)
@@ -19,73 +34,28 @@ Produces:
     4
 ```
 
-If the code throws an exception, this is indicated:
-```
-    >>> getunit([90, 180], 'deg', dim=3)
-    !! ValueError: incorrect vector length: expected 3, got 2
-```
-
-A syntax error in the code will be displayed in the documentation as an error message:
-```
-    >>> print(("Hello, world")
-    !! ^^^^^^^^ SYNTAX ERROR ^^^^^^^^ 
-```
-
-# Code environment
-
-The code is executed in the current Python environment.  Initialization of the Python session prior
-to executing the code block can be achieved by:
+## Installation
 
 ```
-    .. runblock:: pycon
-        :numpy:
-        :scipy:
-        :smtb:
-
-        >>> np.array([1, 2, 3])
+    $ pip install sphinx-pyrunblock
 ```
 
-where the options respectively import: `numpy`, `scipy`, and `spatialmath-toolbox`.
+Enable the extension by adding it to the `extensions` list in `conf.py`:
 
-A more general solution is to add lines of code to the Sphinx `conf.py` file:
-```
-    autorun_languages[
-        "pycon_runfirst"
-    ] = """
-    from spatialmath import SE3
-    SE3._color = False
-    import numpy as np
-    np.set_printoptions(precision=4, suppress=True)
-    from ansitable import ANSITable
-    ANSITable._color = False
-    """
+```python
+    extensions.append("sphinx_pyrunblock")
 ```
 
-This option is useful for setting up the Python environment for all code blocks in the document.
+See the [full documentation](https://petercorke.github.io/sphinx-pyrunblock/)
+for configuration (`conf.py` options, `runfirst` setup), per-block directive
+options (`:numpy:`, `:scipy:`, `:smtb:`, `:precision:`, `:include:`,
+`:exclude:`), and how errors are reported during a build.
 
-Both options can be used together, in which case the code in the ``conf.py`` file is executed second.
+## Heritage
 
-# Installation
-
-Install from source:
-```
-    $ git clone git@github.com:petercorke/sphinx-autorun.git
-    $ python setup.py install
-```
-To enable autorun add `"phinx_autorun"` to the `extension` list in
-`conf.py`:
-```
-    extensions.append("sphinx_autorun")
-```
-
-The documentation is in the `doc/` folder.
-
-# About this fork
-
-
-`sphinx-contrib/autorun` has been forked several times, with various periods of inactivity.
-This fork was created in 2020 to fix some issues with line buffering, and added the
-runfirst configuration.
-
-Recent changes have removed the need to spawn a subprocess for each code block, and 
-dropped support for the console option.
+`sphinx-pyrunblock` began as a fork of
+[sphinx-autorun](https://github.com/WhyNotHugo/sphinx-autorun) by Hugo
+Osvaldo Barrera, itself descended from Vadim Gubergrits' original
+`sphinxcontrib-autorun`. See the
+[full history](https://petercorke.github.io/sphinx-pyrunblock/about.html)
+for the complete lineage.

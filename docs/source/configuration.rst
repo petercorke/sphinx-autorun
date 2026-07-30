@@ -6,6 +6,11 @@ Configuration
 options that apply to one ``runblock`` directive invocation rather than
 the whole document, see :ref:`per-block options <index:Per-block options>`.
 
+Configuration is backward compatible with the older ``sphinx-autorun`` extension, 
+but the ``console`` language prefix is not supported.   ``pycon_input_encoding``
+and ``pycon_output_encoding`` are not supported, but are silently ignored if present in ``conf.py``.  
+
+
 The ``autorun_languages`` dict
 -------------------------------
 
@@ -31,13 +36,12 @@ to set the keys you want to change.
 Per-language keys
 ------------------
 
-``<lang>``
-    Declares ``<lang>`` a valid argument to the ``runblock`` directive
-    (e.g. ``.. runblock:: pycon`` requires ``"pycon"`` to be a key in the
-    merged config). The *value* itself is vestigial -- it dates from the
-    old subprocess-per-language design, where it was the shell command to
-    pipe code into. It isn't read for anything today; only the key's
-    presence matters.
+``<lang>`` is prefix for the keys given below. It is also the argument to the ``runblock`` directive
+(e.g. ``.. runblock:: pycon`` implies that the block will processed as the language ``"pycon"``.
+The *value* itself is vestigial -- it dates from the
+old subprocess-per-language design, where it was the shell command to
+pipe code into. It isn't read for anything today; only the key's
+presence matters.  This provides backward compatibility with the older ``sphinx-autorun`` extension, which used the value to specify the interpreter command.
 
 ``<lang>_prefix_chars``
     Number of characters to strip from the start of each prompted line

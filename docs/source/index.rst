@@ -15,7 +15,7 @@ For example::
         >>> for i in range(5):
         ...    print(i)
 
-produces:
+renders in the document as:
 
 .. runblock:: pycon
 
@@ -98,6 +98,9 @@ Options are given on the directive itself, and apply to that one block only
     Requires numpy to already be imported (via ``:numpy:`` or a configured
     ``runfirst`` -- see :doc:`configuration`).
 
+More examples
+-------------
+
 .. runblock:: pycon
    :include:  5-10
 
@@ -138,8 +141,145 @@ won't appear in the output.
 Lines ending with ``# ignore`` are executed but not shown in the rendered
 output -- useful for setup code that would otherwise clutter the example.
 
+The REPL prompt (``>>>``) is actually optional, and can be omitted if you are cutting
+and pasting chunks of code from elsewhere::
+    
+    .. runblock:: pycon
+
+        a = 2
+        print(a**3)
+
+will render as:
+
+.. runblock:: pycon
+
+   a = 2
+   print(a**3)
+    
+Note that indentation cannot be expressed in this mode since all white space is stripped
+from the start of each line.  If you want to include indented code, use the REPL prompt
+style.
+
+If you prefer the examples to look like a script rather than a REPL session you can
+suppress the output prompts and continuation lines by using the ``:no-prompt:`` option::
+
+    .. runblock:: pycon
+        :no-prompt:
+
+        a = 2
+        print(a**3)
+
+will render as:
+
+.. runblock:: pycon
+    :no-prompt:
+
+    a = 2
+    print(a**3)
+
+Block output appears as a comment line to clearly distinguish it from the lines of input code. 
+This means you can cut and paste the code into a Python interpreter and it will run without modification.
+
+Other code documentation tools
+==============================
+
+.. image:: ../figs/autolink.png
+   :align: left
+   :width: 500
+   :alt: autolink example
+
+.. raw:: html
+
+   <br clear="left"/>
+
+Note the copy/paste button in the top right corner of the code block, the links on
+the names in the code and the hoverbox showing object type.  These are provided by two other Sphinx extensions.
+
+Easy copy-paste of code
+-----------------------
+
+Copying text straight out of a rendered code block normally picks up the
+``>>> ``/``... `` prompts and any output lines along with it, so pasting it
+back into a file or interpreter either fails outright or pastes lines you
+never wanted. The `sphinx-copybutton
+<https://sphinx-copybutton.readthedocs.io/>`__ extension adds a
+copy-to-clipboard button to every code block (see above) and can be configured to strip
+prompts on copy, so a reader always gets clean, runnable code regardless of
+whether the block was written with prompts or ``:no-prompt:``.
+
+.. code-block:: console
+
+    $ pip install sphinx-copybutton
+
+.. code-block:: python
+
+    extensions = [
+        "sphinx_pyrunblock",
+        "sphinx_copybutton",
+    ]
+
+    # Strip >>> / ... prompts (and shell $ prompts) when the copy button is
+    # used; keep output lines in the copied text rather than filtering them
+    # out (also representative of what Peter's other toolboxes use).
+    copybutton_prompt_text = r">>> |\.\.\. |\$ "
+    copybutton_prompt_is_regexp = True
+    copybutton_only_copy_prompt_lines = False
+    copybutton_remove_prompts = True
+
+A ``:no-prompt:`` block has no prompts for copybutton to strip in the first
+place, so it's already copy-paste-ready without any of this -- the button
+is mainly what makes REPL-style blocks pasteable too.
+
+Cross-linking names to their documentation
+--------------------------------------------
+
+``sphinx-pyrunblock`` only executes code and renders output -- it doesn't
+know anything about turning the names in an example into links. That's a
+separate, complementary extension:
+`sphinx-codeautolink <https://sphinx-codeautolink.readthedocs.io/>`__. It
+statically analyses each code block's AST, tracks types through variable
+assignments and chained method calls, and:
+
+* hyperlinks each resolved name to its ``autodoc``-generated (or intersphinx) documentation page,
+* adds a cursor hoverbox showing the type of the variable name under the cursor.
+
+The two extensions don't know about each other, and don't need to --
+``sphinx-codeautolink`` works by scanning the *built* HTML for code blocks
+by CSS class (``highlight-pycon``, ``highlight-python``, etc.), matched
+against source it separately parsed from the doctree. Since ``runblock``
+sets the block's language to ``pycon`` (or ``python``, under
+``:no-prompt:``), any ``runblock`` example gets cross-linked automatically
+once ``sphinx-codeautolink`` is installed and enabled -- no special
+integration required on either side.
+
+.. code-block:: console
+
+    $ pip install sphinx-codeautolink
+
+.. code-block:: python
+
+    extensions = [
+        "sphinx_pyrunblock",
+        "sphinx_codeautolink",
+    ]
+
+    from sphinx_codeautolink import clean_pycon
+
+    # "python" (used by :no-prompt: blocks) is recognised natively; pycon
+    # console syntax needs its prompts cleaned before the block can be
+    # parsed as Python, hence this entry.
+    codeautolink_custom_blocks = {"pycon": clean_pycon}
+
+Require ``sphinx-codeautolink>=0.19.0``. Earlier versions don't resolve
+``Self``-typed return annotations (`PEP 673
+<https://peps.python.org/pep-0673/>`__), which is the standard return
+annotation for fluent/factory-style methods (``obj = Klass.create(...)``)
+-- without the fix, cross-linking silently stops for anything chained off
+a call to one of those, with no warning by default.
+
+
 Error reporting
-----------------
+===============
 
 If the code raises an exception, a diagnostic marker is written to the
 Sphinx build log and a short error summary is embedded in the rendered

@@ -25,8 +25,9 @@ namespaced, rather than a literal interpreter selection.
 
 At Sphinx's ``builder-inited`` event, whatever you set in
 ``autorun_languages`` is merged on top of the extension's own defaults
-(``pycon``, ``pycon_prefix_chars``, ``pycon_show_source``). You only need
-to set the keys you want to change.
+(``pycon``, ``pycon_prefix_chars``, ``pycon_show_source``,
+``pycon_fail_on_error``). You only need to set the keys you want to
+change.
 
 Per-language keys
 ------------------
@@ -49,6 +50,16 @@ Per-language keys
     If true, echo each line of source to the Sphinx build log as it runs
     (useful when debugging a block that isn't producing the output you
     expect). Defaults to ``False``.
+
+``<lang>_fail_on_error``
+    If true, a ``runblock`` whose code raises an exception (or fails to
+    parse) fails the Sphinx build instead of just embedding the
+    ``!! [RUNBLOCK-ERROR]`` marker in the rendered output -- see
+    :ref:`index:Error reporting`. Defaults to ``False``, so existing
+    docs with a runblock that deliberately demonstrates an error keep
+    building. Applies to the whole block, including any
+    ``<lang>_runfirst`` setup code and the ``:numpy:``/``:scipy:``/
+    ``:smtb:``/``:precision:`` options layered on top of it.
 
 ``<lang>_runfirst``
     A newline-separated string of Python statements, **without prompts**,

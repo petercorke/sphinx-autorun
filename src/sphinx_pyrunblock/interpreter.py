@@ -60,11 +60,11 @@ def runsource(self, source, filename="<input>", symbol="single", where=None):
         header = f"!! [RUNBLOCK-ERROR] {where}"
         diag = f"{header}\n    SyntaxError: {e}"
         print(diag, file=sys.stderr)
-        return False, diag
+        return False, diag, True
 
     if code is None:
         # Case 2
-        return True, None
+        return True, None, False
 
     # Case 3
 
@@ -109,10 +109,9 @@ def runsource(self, source, filename="<input>", symbol="single", where=None):
 
         # Include concise marker in rendered runblock output.
         retval = f"{header}\n    {summary}"
-    else:
-        retval = stdout_text
+        return False, retval, True
 
-    return False, retval
+    return False, stdout_text, False
 
 
 def runblock(code, show_source, where):
@@ -121,14 +120,14 @@ def runblock(code, show_source, where):
     console = InteractiveInterpreter()
     results = []
 
-    def append_result(source_text, retval_text):
+    def append_result(source_text, retval_text, failed):
         # lines of code included in the ReST file can be excluded from the final
         # documentation if they end with a comment # ignore
         if source_text.endswith("# ignore"):
             return
         if retval_text is None:
             retval_text = "!! ^^^^^^^^ SYNTAX ERROR ^^^^^^^^"
-        results.append((source_text.rstrip(), retval_text.rstrip()))
+        results.append((source_text.rstrip(), retval_text.rstrip(), failed))
 
     more = False
     source = ""
@@ -137,7 +136,7 @@ def runblock(code, show_source, where):
         while True:
             source = next(source_lines)
 
-            more, retval = runsource(console, source, where=where)
+            more, retval, failed = runsource(console, source, where=where)
             if show_source:
                 print(source)
             while more:
@@ -145,15 +144,15 @@ def runblock(code, show_source, where):
                 if show_source:
                     print("...", next_line)
                 source += "\n" + next_line
-                more, retval = runsource(console, source, where=where)
+                more, retval, failed = runsource(console, source, where=where)
 
-            append_result(source, retval)
+            append_result(source, retval, failed)
     except StopIteration:
         if more:
             # Force execution of an open compound statement at end of block and
             # preserve its output in the returned results.
             source = source + "\n"
-            more, retval = runsource(console, source, where=where)
-            append_result(source, retval)
+            more, retval, failed = runsource(console, source, where=where)
+            append_result(source, retval, failed)
 
     return results

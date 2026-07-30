@@ -19,6 +19,7 @@ class AutoRun(object):
         "pycon": "python ",  # declare pycon a valid language
         "pycon_prefix_chars": 4,
         "pycon_show_source": False,
+        "pycon_fail_on_error": False,
     }
 
     @classmethod

@@ -173,3 +173,24 @@ A syntax error in the code block is reported the same way:
     >>> print(("Hello, world")
     !! [RUNBLOCK-ERROR] source/api.rst:42
         SyntaxError: '(' was never closed
+
+By default the build itself still succeeds -- the marker above is the
+only sign anything went wrong, which means a broken example (a typo, a
+missing optional dependency) can slip into published docs unnoticed. Set
+``pycon_fail_on_error = True`` (see :doc:`configuration`) to turn that
+into a real, CI-visible build failure instead:
+
+.. code-block:: python
+
+    autorun_languages = {}
+    autorun_languages["pycon_fail_on_error"] = True
+
+.. code-block:: text
+
+    sphinx.errors.SphinxError: runblock failed executing code at source/api.rst:42
+
+The build log still has the full traceback above the ``SphinxError``, so
+the file:line in the exception message is a pointer back into your
+``.rst`` source, not the only diagnostic you get. This defaults to
+``False`` so existing docs with a runblock that's deliberately
+demonstrating an error as its expected output keep building.

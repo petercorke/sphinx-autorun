@@ -100,6 +100,9 @@ class RunBlock(Directive):
         show_source = config.get(
             language + "_show_source", False
         )  # show the source code
+        fail_on_error = config.get(
+            language + "_fail_on_error", False
+        )  # fail the build if any statement in the block raises
 
         # attempt to find the originating source, with robust fallback to rst file
         srcfile = shorter(self.reporter.source)
@@ -148,10 +151,15 @@ class RunBlock(Directive):
         ######## RUN THE CODE BLOCK ##########
         results = runblock(code, show_source, where)
 
-        # the result is a list of tuples, each tuple is a pair of input and output
+        # each result is a triple: input, output, and whether it raised.
+        # Failure is checked across *all* results, including the runfirst
+        # setup code, since a broken runfirst is just as much a bug as a
+        # broken block statement.
+        if fail_on_error and any(failed for _, _, failed in results):
+            raise RunBlockError(f"runblock failed executing code at {where}")
 
         code_out = ""
-        for lineno, (inp, outp) in enumerate(
+        for lineno, (inp, outp, _failed) in enumerate(
             results[runfirst_len:],
             start=1,
         ):  # for all i/o pairs after the runfirst code

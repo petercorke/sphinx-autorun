@@ -5,6 +5,8 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-07-31
+
 ### Added
 
 - `:no-prompt:` per-block directive option: renders a block as plain
@@ -41,6 +43,7 @@ Osvaldo Barrera). Hard fork -- heritage documented in the docs.
 
 See `docs/source/about.rst` for the full project lineage.
 
-[Unreleased]: https://github.com/petercorke/sphinx-pyrunblock/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/petercorke/sphinx-pyrunblock/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/petercorke/sphinx-pyrunblock/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/petercorke/sphinx-pyrunblock/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/petercorke/sphinx-pyrunblock/releases/tag/v1.0.0

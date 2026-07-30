@@ -1,6 +1,19 @@
 # Technical Debt
 
-## `runblock` never fails the Sphinx build on a runtime error
+## `runblock` never fails the Sphinx build on a runtime error — RESOLVED
+
+Resolved 2026-07-31 on `feature/fail-on-error`: added the opt-in
+`pycon_fail_on_error` config key described below, exactly as proposed.
+`runsource()`/`runblock()` (`src/sphinx_pyrunblock/interpreter.py`) now
+return a structured `failed: bool` alongside each result instead of the
+old marker-string sniffing, and `RunBlock.run()` raises `RunBlockError`
+(with the `file:line` location, matching the existing `!! [RUNBLOCK-ERROR]`
+marker's location) when enabled and any statement in the block — including
+`runfirst` setup code — failed. Defaults to `False`, so existing docs with
+a runblock deliberately demonstrating an error keep building unchanged.
+Documented in `docs/source/{index,configuration}.rst`. Downstream
+toolboxes (RTB, MVTB, SMTB, bdsim, spatialgeometry) still need to opt in
+via their own `conf.py` — that rollout hasn't happened yet.
 
 ### Background
 

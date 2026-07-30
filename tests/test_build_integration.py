@@ -98,6 +98,18 @@ def test_plain_block_after_no_prompt_blocks_still_uses_pycon(tmp_path):
     assert '<span class="go">8</span>' in html
 
 
+def test_error_does_not_fail_build_by_default(tmp_path):
+    app = _build(ROOTS / "test-error-default", tmp_path)
+    assert app.statuscode == 0
+    html = (tmp_path / "build" / "index.html").read_text("utf-8")
+    assert "RUNBLOCK-ERROR" in html
+
+
+def test_fail_on_error_raises_runblockerror(tmp_path):
+    with pytest.raises(SphinxError, match=r"runblock failed executing code"):
+        _build(ROOTS / "test-fail-on-error", tmp_path)
+
+
 def test_unknown_language_raises_runblockerror(tmp_path):
     src = tmp_path / "src"
     src.mkdir()

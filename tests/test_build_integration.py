@@ -55,6 +55,49 @@ def test_numpy_option_available_in_block(tmp_path):
     assert '<span class="go">np.int64(6)</span>' in html
 
 
+def test_no_prompt_renders_plain_python_language(tmp_path):
+    _build(ROOTS / "test-no-prompt", tmp_path)
+    html = (tmp_path / "build" / "index.html").read_text("utf-8")
+    assert "highlight-python" in html
+
+
+def test_no_prompt_block_has_no_repl_prompt_spans(tmp_path):
+    _build(ROOTS / "test-no-prompt", tmp_path)
+    html = (tmp_path / "build" / "index.html").read_text("utf-8")
+    # The first two blocks are :no-prompt:; neither should contain a
+    # ">>> " prompt span (class "gp", generic-prompt) anywhere before the
+    # third, plain block's own prompts start.
+    no_prompt_section = html.split('highlight-pycon')[0]
+    assert 'class="gp"' not in no_prompt_section
+
+
+def test_no_prompt_output_rendered_as_comment(tmp_path):
+    _build(ROOTS / "test-no-prompt", tmp_path)
+    html = (tmp_path / "build" / "index.html").read_text("utf-8")
+    assert '<span class="c1"># → 8</span>' in html
+
+
+def test_no_prompt_preserves_compound_statement_indentation(tmp_path):
+    # Regression: :no-prompt: content has no >>> / ... prompts to encode
+    # indentation, so the directive must not destructively .strip() every
+    # line -- that would flatten a for-loop's body and produce a
+    # SyntaxError instead of executing it.
+    app = _build(ROOTS / "test-no-prompt", tmp_path)
+    assert app.statuscode == 0
+    html = (tmp_path / "build" / "index.html").read_text("utf-8")
+    assert "RUNBLOCK-ERROR" not in html
+    assert '<span class="c1"># → 0</span>' in html
+    assert '<span class="c1"># → 1</span>' in html
+    assert '<span class="c1"># → 2</span>' in html
+
+
+def test_plain_block_after_no_prompt_blocks_still_uses_pycon(tmp_path):
+    _build(ROOTS / "test-no-prompt", tmp_path)
+    html = (tmp_path / "build" / "index.html").read_text("utf-8")
+    assert "highlight-pycon" in html
+    assert '<span class="go">8</span>' in html
+
+
 def test_error_does_not_fail_build_by_default(tmp_path):
     app = _build(ROOTS / "test-error-default", tmp_path)
     assert app.statuscode == 0

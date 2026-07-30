@@ -3,6 +3,8 @@ name: Docs
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -34,11 +36,17 @@ jobs:
         run: sphinx-build -b html docs/source docs/build/html -W
 
       - uses: actions/upload-pages-artifact@v5
+        # Pages deployment needs write access to the github-pages
+        # environment, which PRs from forks (and even same-repo PRs,
+        # depending on branch protection) don't get -- only upload the
+        # artifact and deploy on an actual push to main.
+        if: github.event_name == 'push'
         with:
           path: docs/build/html
 
   deploy:
     needs: build
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     environment:
       name: github-pages

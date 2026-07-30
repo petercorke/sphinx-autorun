@@ -70,6 +70,7 @@ class RunBlock(Directive):
         "scipy": directives.flag,
         "smtb": directives.flag,
         "precision": directives.unchanged,
+        "no-prompt": directives.flag,
     }
 
     def run(self):
@@ -117,6 +118,8 @@ class RunBlock(Directive):
 
         where = f"{srcfile}:{self.lineno}"
 
+        no_prompt = "no-prompt" in self.options
+
         runfirst = build_runfirst(config.get(language + "_runfirst", ""), self.options)
 
         include_lines = linerange(self.options.get("include", None))
@@ -131,22 +134,31 @@ class RunBlock(Directive):
 
         runfirst_len = len(code)
 
-        # self.content is a list of lines of the code block, with prompts.
-        # Only strip the prompt prefix (e.g. ">>> " or "... ") from lines that
-        # actually carry a prompt; bare continuation lines (e.g. the body of a
-        # triple-quoted string) must not have their content characters removed.
-        def _strip_line(line):
-            s = line.strip()
-            if s in (">>>", "..."):
-                # A bare prompt with nothing typed after it represents an
-                # empty input line (e.g. pressing Enter to close a compound
-                # statement), not literal ">>>"/"..." text.
-                return ""
-            if s.startswith((">>> ", "... ")):
-                return s[prefix_chars:]
-            return s
+        if no_prompt:
+            # Plain code, no prompts to look for -- only trim trailing
+            # whitespace. Leading whitespace is real Python indentation
+            # (docutils has already removed the directive's own base
+            # indentation from self.content) and must survive untouched,
+            # otherwise a compound statement's body loses its indent.
+            code += [line.rstrip() for line in self.content]
+        else:
+            # self.content is a list of lines of the code block, with
+            # prompts. Only strip the prompt prefix (e.g. ">>> " or "... ")
+            # from lines that actually carry a prompt; bare continuation
+            # lines (e.g. the body of a triple-quoted string) must not have
+            # their content characters removed.
+            def _strip_line(line):
+                s = line.strip()
+                if s in (">>>", "..."):
+                    # A bare prompt with nothing typed after it represents
+                    # an empty input line (e.g. pressing Enter to close a
+                    # compound statement), not literal ">>>"/"..." text.
+                    return ""
+                if s.startswith((">>> ", "... ")):
+                    return s[prefix_chars:]
+                return s
 
-        code += [_strip_line(line) for line in self.content]
+            code += [_strip_line(line) for line in self.content]
 
         ######## RUN THE CODE BLOCK ##########
         results = runblock(code, show_source, where)
@@ -169,21 +181,37 @@ class RunBlock(Directive):
             if include_lines and lineno not in include_lines:
                 continue
 
-            if "\n" in inp:
-                # multiline input
-                lines = inp.split("\n")
-                code_out += (
-                    "\n".join(
-                        [">>> " + lines[0]] + ["... " + line for line in lines[1:]]
+            if no_prompt:
+                # Plain code, no REPL prompts. Output lines are rendered as
+                # Python comments (rather than bare text) so the whole block
+                # stays valid Python under the "python" Pygments lexer used
+                # below -- an un-prefixed arrow isn't valid syntax and gets
+                # highlighted as a lexer error instead of plain text.
+                code_out += inp + "\n"
+                if len(outp) > 0:
+                    code_out += (
+                        "\n".join(f"# → {line}" for line in outp.split("\n"))
+                        + "\n"
                     )
-                    + "\n"
-                )
             else:
-                code_out += ">>> " + inp + "\n"
-            if len(outp) > 0:
-                code_out += outp + "\n"
+                if "\n" in inp:
+                    # multiline input
+                    lines = inp.split("\n")
+                    code_out += (
+                        "\n".join(
+                            [">>> " + lines[0]] + ["... " + line for line in lines[1:]]
+                        )
+                        + "\n"
+                    )
+                else:
+                    code_out += ">>> " + inp + "\n"
+                if len(outp) > 0:
+                    code_out += outp + "\n"
 
         literal = nodes.literal_block(code_out, code_out)
-        literal["language"] = language
+        # :no-prompt: renders as plain code, so it needs the "python" lexer
+        # rather than "pycon" -- pycon's own input/output distinction relies
+        # entirely on the >>> / ... prompts this option removes.
+        literal["language"] = "python" if no_prompt else language
         literal["linenos"] = "linenos" in self.options
         return [literal]
